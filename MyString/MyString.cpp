@@ -6,6 +6,8 @@
 //Класс должен содержать методы для ввода строк с клавиатуры и вывода строк на экран.
 //Также нужно реализоватьстатическую функцию - член, которая будет возвращатьколичество созданных объектов строк
 
+//Добавьте все необходимые конструкторы и перегрузки для максимальной близости к оригинальному классу.
+
 #include <iostream>
 #include <Windows.h>
 
@@ -13,13 +15,12 @@ using namespace std;
 
 class MyString
 {
-    static inline unsigned cnt{0};       // способ инициализировать статическую переменную внути класса при помощи inline
+    static inline size_t cnt{0};       // способ инициализировать статическую переменную внути класса при помощи inline
     size_t length;
 	char* line;
     
 public:
 
-	
 	MyString() :MyString(nullptr) {}
 
     MyString(const char* lineP)
@@ -31,55 +32,87 @@ public:
             strcpy_s(line, length + 1, lineP);
         }
 	}
+    MyString(size_t lengthP, char* lineP) :length{ lengthP }, line{ lineP }{}
+
+    // конструктор копирования
+    MyString(const MyString& myStr):MyString(myStr.length, myStr.line){}
+
+    // конструктор перемещения
+    MyString(MyString&& myStr)noexcept
+	{
+        this->length = myStr.length;
+        this->line = myStr.line;
+        myStr.line = nullptr;
+	}
 
     ~MyString()
     {
 #ifdef _DEBUG
         cout << "Сработал деструктор и убил " << cnt << "-й объект\n";
 #endif
-        delete []line;
+        if(!line)
+        {
+	        delete[]line;
+        }
         cnt--;
     }
-  
-    
-	static int stringCounter()
-    {
-        return cnt;
-    }
 
-    void getLine()
+
+    // ввод строки до символа ввода
+    void getLine()      
     {
 #define MAXLEN 32767  // максимальная длина строки
                
         char buffStr[MAXLEN]{};
-        gets_s(buffStr, MAXLEN);                     
+        gets_s(buffStr, MAXLEN);
         this->length = strlen(buffStr);
         delete[] line;              // грохаем то, что было в строке до ввода
         line = new char[length + 1] {};
         strcpy_s(line, this->length+1, buffStr);
     }
-    void print()
+    // печать
+    void print()const
     {
-		cout << this->line << endl;
+		cout << this->line;
     }
-    char* getStr() const
+    //длина строки
+    size_t strLength()const
 	{
-        return this->line;
+        return this->length;
 	}
-    void setStr(char* string_p)
-	{
-        this->line = string_p;
-        this->length = strlen(string_p);
-	}
-    friend istream& operator>>(istream&, MyString&);
+    static size_t stringCounter()
+    {
+        return cnt;
+    }
+
+	friend istream& operator>>(istream&, MyString&);
+    friend ostream& operator<< (ostream&, const MyString&);
+    MyString& operator=(const MyString& myStr)
+    {
+        if (this != &myStr) {
+            this->length = myStr.length;
+            this->line = new char[this->length + 1];
+            strcpy_s(this->line, length, myStr.line);
+        }
+        return *this;
+    }
+
+    MyString& operator=(MyString&& myStr)noexcept
+    {
+        if (this != &myStr) {
+            delete[]line;
+            this->length = myStr.length;
+            this->line = myStr.line;
+        }
+        return *this;
+    }
 
 };
 ostream& operator<< (ostream& os, const MyString& string)
 {
-    os << string.getStr();
+    os << string.line;
     return os;
 }
-
 istream& operator>>(istream& is, MyString& string) // как и в стандартном string оператор >> вытягивает из потока набор символов до пробела
 {
     char buffer[MAXLEN+1]{};
@@ -109,6 +142,7 @@ int main()
     char str[] = "Куку";
     MyString test2{ str };
     test2.print();
+    MyString test3; // проверка работы деструктора на пустом объекте
     
 }
 
