@@ -116,6 +116,18 @@ public:
     {
         return (!strcmp(this->line, str.line)); // strcmp возвращает 0 если строки равны
     }
+    bool operator!=(const MyString& str) const
+    {
+        return (strcmp(this->line, str.line)); 
+    }
+    bool operator>(const MyString& str) const
+    {
+        return (strcmp(this->line, str.line)>0);
+    }
+    bool operator<(const MyString& str) const
+    {
+        return (strcmp(this->line, str.line) < 0);
+    }
 
 };
 MyString operator+(const MyString& str1, const MyString& str2)
@@ -164,6 +176,7 @@ int main()
     MyString test4{ "ПЫЩЪ!" };
     MyString test5 = test2 + test4;
     cout << test5 << '\n';
+    // проверка работы перегрузок
     cout << (test4 == test2) << '\n';
     const MyString test6{ test4 };
     cout << (test6 == test4) << '\n';
