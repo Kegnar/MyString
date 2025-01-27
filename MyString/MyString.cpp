@@ -57,7 +57,6 @@ public:
         cnt--;
     }
 
-
     // ввод строки до символа ввода
     void getLine()      
     {
@@ -87,6 +86,7 @@ public:
 
 	friend istream& operator>>(istream&, MyString&);
     friend ostream& operator<< (ostream&, const MyString&);
+    friend MyString operator+(const MyString&, const MyString&);
     MyString& operator=(const MyString& myStr)
     {
         if (this != &myStr) {
@@ -106,8 +106,25 @@ public:
         }
         return *this;
     }
+    MyString& operator+=( const MyString& str)
+    {
+        strcat_s(this->line, MAXLEN * 2 + 1, str.line);
+        this->length += str.length;
+        return *this;
+    }
+    bool operator==(const MyString& str) const
+    {
+        return (!strcmp(this->line, str.line)); // strcmp возвращает 0 если строки равны
+    }
 
 };
+MyString operator+(const MyString& str1, const MyString& str2)
+{
+    MyString tmp{ str1 };
+    tmp.length = str1.length + str2.length;
+    strcat_s(tmp.line, tmp.length + 1, str2.line);
+    return tmp;
+}
 ostream& operator<< (ostream& os, const MyString& string)
 {
     os << string.line;
@@ -130,19 +147,25 @@ int main()
 
     MyString test;
 
-    cout << "Ввод данных в объект через метод:";
-    test.getLine();
-    cout << "Вывод данных из объекта через метод:";
-	test.print();
-    cout << '\n';
-    cout << "Ввод данных в объект через перегруз >>:";
-    cin >> test;
-    cout << "Печать при помощи перегрузки оператора <<: " << test << '\n';
+ //   cout << "Ввод данных в объект через метод:";
+ //   test.getLine();
+ //   cout << "Вывод данных из объекта через метод:";
+	//test.print();
+ //   cout << '\n';
+ //   cout << "Ввод данных в объект через перегруз >>:";
+ //   cin >> test;
+ //   cout << "Печать при помощи перегрузки оператора <<: " << test << '\n';
 
     char str[] = "Куку";
     MyString test2{ str };
     test2.print();
+    cout << '\n';
     MyString test3; // проверка работы деструктора на пустом объекте
-    
+    MyString test4{ "ПЫЩЪ!" };
+    MyString test5 = test2 + test4;
+    cout << test5 << '\n';
+    cout << (test4 == test2) << '\n';
+    const MyString test6{ test4 };
+    cout << (test6 == test4) << '\n';
 }
 
