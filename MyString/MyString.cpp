@@ -4,7 +4,6 @@
 //Конструктор, который создаёт строку и инициализирует её строкой, полученной от пользователя.
 //Необходимо создать деструктор, а также использоватьмеханизмы делегирования конструкторов, если это возможно.
 //Класс должен содержать методы для ввода строк с клавиатуры и вывода строк на экран.
-//Также нужно реализоватьстатическую функцию - член, которая будет возвращатьколичество созданных объектов строк
 
 //Добавьте все необходимые конструкторы и перегрузки для максимальной близости к оригинальному классу.
 
@@ -15,7 +14,6 @@ using namespace std;
 
 class MyString
 {
-    static inline size_t cnt{0};       // способ инициализировать статическую переменную внути класса при помощи inline
     size_t length;
 	char* line;
     
@@ -25,7 +23,6 @@ public:
 
     MyString(const char* lineP)
 	{
-        cnt++;
         if (lineP) {
             length = strlen(lineP);
             line = new char[length + 1] {};
@@ -47,14 +44,10 @@ public:
 
     ~MyString()
     {
-#ifdef _DEBUG
-        cout << "Сработал деструктор и убил " << cnt << "-й объект\n";
-#endif
         if(!line)
         {
 	        delete[]line;
         }
-        cnt--;
     }
 
     // ввод строки до символа ввода
@@ -79,10 +72,7 @@ public:
 	{
         return this->length;
 	}
-    static size_t stringCounter()
-    {
-        return cnt;
-    }
+
 
 	friend istream& operator>>(istream&, MyString&);
     friend ostream& operator<< (ostream&, const MyString&);
@@ -92,7 +82,7 @@ public:
         if (this != &myStr) {
             this->length = myStr.length;
             this->line = new char[this->length + 1];
-            strcpy_s(this->line, length, myStr.line);
+            strcpy_s(this->line, length+1, myStr.line);
         }
         return *this;
     }
@@ -128,11 +118,21 @@ public:
     {
         return (strcmp(this->line, str.line) < 0);
     }
+    bool operator<=(const MyString& str) const
+    {
+        if ((strcmp(this->line, str.line) < 0) || (strcmp(this->line, str.line) == 0)) { return true; }
+        return false;
+    }
+    bool operator>=(const MyString& str) const
+    {
+        if ((strcmp(this->line, str.line) > 0) || (strcmp(this->line, str.line) == 0)) { return true; }
+        return false;
+    }
 
 };
 MyString operator+(const MyString& str1, const MyString& str2)
 {
-    MyString tmp{ str1 };
+    MyString tmp{ str1.line };
     tmp.length = str1.length + str2.length;
     strcat_s(tmp.line, tmp.length + 1, str2.line);
     return tmp;
@@ -151,7 +151,13 @@ istream& operator>>(istream& is, MyString& string) // как и в станда�
     string.line = buffer;
     return is;
 }
-
+// 
+void swap(MyString& str1, MyString& str2)noexcept
+{
+    MyString tmp{ str1 };
+    str1 = str2;
+    str2 = tmp;
+}
 int main()
 {
     SetConsoleCP(1251);
@@ -177,8 +183,26 @@ int main()
     MyString test5 = test2 + test4;
     cout << test5 << '\n';
     // проверка работы перегрузок
+    cout << test4 << "==" << test2 << ' ';
     cout << (test4 == test2) << '\n';
-    const MyString test6{ test4 };
+    MyString test6{ test4 };
+    cout << test6 << "==" << test4 << ' ';
     cout << (test6 == test4) << '\n';
+    cout << test4 << ">=" << test2 << ' ';
+    cout << (test6 >= test4) << '\n';
+    MyString test7 = test4 + test2;
+    cout << test7 << ">=" << test5 << ' ';
+    cout << (test7 >= test5) << '\n';
+    cout << test7 << "<=" << test5 << ' ';
+    cout << (test7 <= test5) << '\n';
+    MyString test8{ test4 };
+    cout << test8 << "<=" << test4 << ' ';
+    cout << (test8 <= test4) << '\n';
+    cout << test8 << "!=" << test4 << ' ';
+    cout << (test8 != test4) << '\n';
+    cout << test2 << ' ' << test4 << '\n';
+    cout << "Работа функции swap\n";
+    swap(test2, test4);
+    cout << test2 << ' ' << test4;
 }
 
