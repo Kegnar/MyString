@@ -25,8 +25,8 @@ public:
 	{
         if (lineP) {
             length = strlen(lineP);
-            line = new char[length + 1] {};
-            strcpy_s(line, length + 1, lineP);
+            line = new char[strlen(lineP) + 1] {};
+            strcpy_s(line, strlen(lineP) + 1, lineP);
         }
 	}
     MyString(size_t lengthP, char* lineP) :length{ lengthP }, line{ lineP }{}
@@ -128,7 +128,14 @@ public:
         if ((strcmp(this->line, str.line) > 0) || (strcmp(this->line, str.line) == 0)) { return true; }
         return false;
     }
-
+    char& operator[](int idx)
+    {
+        return this->line[idx];
+    }
+    const char& operator[](const int idx)const
+    {
+        return this->line[idx];
+    }
 };
 MyString operator+(const MyString& str1, const MyString& str2)
 {
@@ -145,8 +152,9 @@ ostream& operator<< (ostream& os, const MyString& string)
 istream& operator>>(istream& is, MyString& string) // как и в стандартном string оператор >> вытягивает из потока набор символов до пробела
 {
     char buffer[MAXLEN+1]{};
-    is.get(buffer, MAXLEN,' ');
-
+    is.get(buffer, MAXLEN);    //TODO: дописать отрезание текста после первого пробела
+      
+    delete[] string.line;
     string.length = strlen(buffer);
     string.line = buffer;
     return is;
@@ -165,24 +173,25 @@ int main()
 
     MyString test;
 
- //   cout << "Ввод данных в объект через метод:";
- //   test.getLine();
- //   cout << "Вывод данных из объекта через метод:";
-	//test.print();
- //   cout << '\n';
- //   cout << "Ввод данных в объект через перегруз >>:";
- //   cin >> test;
- //   cout << "Печать при помощи перегрузки оператора <<: " << test << '\n';
+    cout << "Ввод данных в объект через метод:";
+    test.getLine();
+    cout << "Вывод данных из объекта через метод:";
+	test.print();
+    cout << '\n';
+    cout << "Ввод данных в объект через перегруз >>:";
+    cin >> test;
+    cout << "Печать при помощи перегрузки оператора <<: " << test << '\n';
 
     char str[] = "Куку";
     MyString test2{ str };
-    test2.print();
     cout << '\n';
     MyString test3; // проверка работы деструктора на пустом объекте
     MyString test4{ "ПЫЩЪ!" };
+
+    cout << "проверка работы перегрузок\n";
+    cout << test2 << "==" << test4 << ' ';
     MyString test5 = test2 + test4;
     cout << test5 << '\n';
-    // проверка работы перегрузок
     cout << test4 << "==" << test2 << ' ';
     cout << (test4 == test2) << '\n';
     MyString test6{ test4 };
@@ -201,8 +210,15 @@ int main()
     cout << test8 << "!=" << test4 << ' ';
     cout << (test8 != test4) << '\n';
     cout << test2 << ' ' << test4 << '\n';
-    cout << "Работа функции swap\n";
+    cout << "Куку[2] = " << test2[2]<<'\n';
+    cout << "Куку[2] = \'ы\'\n";
+    test2[2] = 'ы';
+    cout << test2;
+    cout << "\nРабота функции swap\n";
     swap(test2, test4);
-    cout << test2 << ' ' << test4;
+    cout << test2 << ' ' << test4 << '\n';
+    cout << "Работа функции strLength\n";
+    cout << test5 << '=' << test5.strLength() << '\n';
+
 }
 
