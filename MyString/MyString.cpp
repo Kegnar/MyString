@@ -149,14 +149,20 @@ ostream& operator<< (ostream& os, const MyString& string)
     os << string.line;
     return os;
 }
-istream& operator>>(istream& is, MyString& string) // как и в стандартном string оператор >> вытягивает из потока набор символов до пробела
+istream& operator>>(istream& is, MyString& string) // как и в стандартном string оператор >> вытягивает из потока набор символов до пробела 
 {
     char buffer[MAXLEN+1]{};
-    is.get(buffer, MAXLEN);    //TODO: дописать отрезание текста после первого пробела
-      
-    delete[] string.line;
-    string.length = strlen(buffer);
-    string.line = buffer;
+    is.get(buffer, MAXLEN);
+    char* space_ptr = strchr(buffer, ' '); // нашли пробел
+    if (space_ptr) {
+        string.length = space_ptr - buffer;
+        strncpy_s(string.line,string.length + 1,  buffer,string.length);
+    }
+    else
+    {
+        string.length = strlen(buffer);
+        string.line = buffer;
+    }
     return is;
 }
 // 
@@ -189,34 +195,38 @@ int main()
     MyString test4{ "ПЫЩЪ!" };
 
     cout << "проверка работы перегрузок\n";
-    cout << test2 << "==" << test4 << ' ';
+    cout << test2 << " + " << test4 << " = ";
     MyString test5 = test2 + test4;
     cout << test5 << '\n';
-    cout << test4 << "==" << test2 << ' ';
+
+    cout << test4 << " == " << test2 << ' ';
     cout << (test4 == test2) << '\n';
     MyString test6{ test4 };
-    cout << test6 << "==" << test4 << ' ';
+    cout << test6 << " == " << test4 << ' ';
     cout << (test6 == test4) << '\n';
-    cout << test4 << ">=" << test2 << ' ';
+    cout << test4 << " >= " << test2 << ' ';
     cout << (test6 >= test4) << '\n';
     MyString test7 = test4 + test2;
-    cout << test7 << ">=" << test5 << ' ';
+    cout << test7 << " >= " << test5 << ' ';
     cout << (test7 >= test5) << '\n';
-    cout << test7 << "<=" << test5 << ' ';
+    cout << test7 << " <= " << test5 << ' ';
     cout << (test7 <= test5) << '\n';
     MyString test8{ test4 };
-    cout << test8 << "<=" << test4 << ' ';
+    cout << test8 << " <= " << test4 << ' ';
     cout << (test8 <= test4) << '\n';
-    cout << test8 << "!=" << test4 << ' ';
+    cout << test8 << " != " << test4 << ' ';
     cout << (test8 != test4) << '\n';
-    cout << test2 << ' ' << test4 << '\n';
+
+    cout << "\nперегрузка индексации\n";
     cout << "Куку[2] = " << test2[2]<<'\n';
     cout << "Куку[2] = \'ы\'\n";
+
     test2[2] = 'ы';
     cout << test2;
     cout << "\nРабота функции swap\n";
     swap(test2, test4);
     cout << test2 << ' ' << test4 << '\n';
+
     cout << "Работа функции strLength\n";
     cout << test5 << '=' << test5.strLength() << '\n';
 
